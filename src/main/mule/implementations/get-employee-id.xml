@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:snowflake="http://www.mulesoft.org/schema/mule/snowflake"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/snowflake http://www.mulesoft.org/schema/mule/snowflake/current/mule-snowflake.xsd">
+	<flow name="get-employee-idFlow" doc:id="b4eb6e0b-7a6d-4b28-ae70-ec07f3a75069" >
+        <snowflake:select doc:name="Select" doc:id="b676b7a2-fd02-4ab1-80a1-0e2de48f3c72" config-ref="Snowflake_Config">
+			<snowflake:sql ><![CDATA[select * from emplo where employeeId = :employeeId]]></snowflake:sql>
+			<snowflake:input-parameters ><![CDATA[#[{
+	"employeeId": attributes.uriParams.'employeeId'
+}]]]></snowflake:input-parameters>
+		</snowflake:select>
+		<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload map(item,index) -> {
+	firstName: item.firstName,
+	lastName: item.lastName,
+	domain: item.domain,
+	age: item.age,
+	phone: item.phone,
+	email: item.email,
+	address: {
+		city: item.city,
+	district: item.district,
+	pincode: item.pincode,
+	state: item.state,
+	country: item.country
+	}
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+	</flow>
+</mule>

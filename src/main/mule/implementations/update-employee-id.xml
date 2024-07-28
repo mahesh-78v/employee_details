@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:snowflake="http://www.mulesoft.org/schema/mule/snowflake"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/snowflake http://www.mulesoft.org/schema/mule/snowflake/current/mule-snowflake.xsd">
+	<flow name="update-employee-idFlow" doc:id="5457060e-2729-4eca-a21a-b9295749f983">
+		<snowflake:update doc:name="Update" doc:id="a3847b9e-05d3-4ace-87ae-5d984e6964aa" config-ref="Snowflake_Config">
+			<snowflake:sql><![CDATA[update emplo set firstName = :firstName,lastName = :lastName,domain = :domain,employeeId = :employeeId,age = :age,phone = :phone,email = :email,city = :city,district = :district,pincode = :pincode,state = :state,country = :country where employeeId = :employeeId]]></snowflake:sql>
+			<snowflake:input-parameters ><![CDATA[#[{
+	firstName: payload.employee.firstName,
+	lastName: payload.employee.lastName,
+	domain: payload.employee.domain,
+	employeeId: attributes.uriParams.employeeId,
+	age: payload.employee.age,
+	phone: payload.employee.phone,
+	email: payload.employee.email,
+	city: payload.employee.address.city,
+	district: payload.employee.address.district,
+	pincode: payload.employee.address.pincode,
+	state: payload.employee.address.state,
+	country: payload.employee.address.country
+}]]]></snowflake:input-parameters>
+		</snowflake:update>
+		<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+---
+{
+  response: {
+    message: "employee details updated successfully with employeId"
+    }
+    
+} ]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+	</flow>
+</mule>

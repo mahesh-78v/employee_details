@@ -1,0 +1,11 @@
+http:
+    host: "localhost"
+    port: "8081"
+    
+snow:
+    accountName: "ya09209.central-india.azure"
+    warehouse: "COMPUTE_WH"
+    database: "employeeData"
+    schema: "Info"
+    user: "surya"
+    role: "ACCOUNTADMIN"    

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd ">
+    
+    <flow name="employee_details-main">
+        <http:listener config-ref="employee_details-httpListenerConfig" path="/api/*">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body>#[payload]</http:body>
+                <http:headers>#[vars.outboundHeaders default {}]</http:headers>
+            </http:error-response>
+        </http:listener>
+        <logger level="INFO" doc:name="Logger" doc:id="b2974ae4-656b-4774-993c-b82d4c377ffd" message="${secure::snow.password}"/>
+		<apikit:router config-ref="employee_details-config" />
+        <error-handler ref="global-error-handlerError_Handler">
+            
+        </error-handler>
+    </flow>
+    <flow name="patch:\employee\(employeeId):application\xml:employee_details-config">
+		<flow-ref doc:name="Flow Reference" doc:id="0c7235a5-07f3-4815-abd3-969b2f1e59c0" name="update-employee-idFlow"/>
+    </flow>
+    <flow name="get:\employee:employee_details-config">
+		<flow-ref doc:name="Flow Reference" doc:id="93ffd02f-52fa-4966-b716-c1cd936b41fc" name="get-employee-information-domainFlow"/>
+        
+    </flow>
+    <flow name="get:\employee\(employeeId):employee_details-config">
+		<flow-ref doc:name="Flow Reference" doc:id="41212fbf-85d5-44be-a050-a8e408323e8b" name="get-employee-idFlow"/>
+        
+    </flow>
+    <flow name="post:\employee:application\json:employee_details-config">
+		<flow-ref doc:name="Flow Reference" doc:id="279e93e4-5194-481d-8030-a398d090a648" name="create-employeeFlow"/>
+    </flow>
+</mule>

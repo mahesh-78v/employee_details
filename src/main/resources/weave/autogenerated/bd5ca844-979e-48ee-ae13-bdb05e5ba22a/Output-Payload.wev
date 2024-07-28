@@ -1,0 +1,4 @@
+%dw 2.0
+
+type auto_bd5ca844_979e_48ee_ae13_bdb05e5ba22a_Output_Payload = Array<{  firstName: String,   lastName: String,   address: {    pincode: String,     country: String,     city: String,     district: String,     state: String,     _?: Any  },   phone: String,   domain: String,   employeeId: String,   age: Number,   email: String,   _?: Any}>
+

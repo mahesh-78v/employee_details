@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:snowflake="http://www.mulesoft.org/schema/mule/snowflake"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/snowflake http://www.mulesoft.org/schema/mule/snowflake/current/mule-snowflake.xsd">
+	<snowflake:snowflake-config name="Snowflake_Config" doc:name="Snowflake Config" doc:id="3fd7e203-a709-470b-9a8b-1a973622823f" >
+		<snowflake:snowflake-connection accountName="${snow.accountName}" warehouse="${snow.warehouse}" database="${snow.database}" schema="${snow.schema}" user="${snow.user}" password="${secure::snow.password}" role="${snow.role}" />
+	</snowflake:snowflake-config>
+	<flow name="create-employeeFlow" doc:id="419a7633-b677-4c8d-80fe-32739a80afb4" >
+		<set-variable value="#[payload.employeeId]" doc:name="Set Variable" doc:id="3c3d7692-402b-4f6b-be55-264b751882a6" variableName="empid"/>
+		<snowflake:insert doc:name="Insert" doc:id="48f3037f-f346-4203-89a4-0722c19380f4" config-ref="Snowflake_Config">
+			<snowflake:sql ><![CDATA[insert into emplo (firstName,lastName,domain,employeeId,age,phone,email,city,district,pincode,state,country) values (:firstName,:lastName,:domain,:employeeId,:age,:phone,:email,:city,:district,:pincode,:state,:country) ]]></snowflake:sql>
+			<snowflake:input-parameters ><![CDATA[#[{
+	firstName: payload.firstName,
+	lastName: payload.lastName,
+	domain: payload.domain,
+	employeeId: payload.employeeId,
+	age: payload.age,
+	phone: payload.phone,
+	email: payload.email,
+	city: payload.address.city,
+	district: payload.address.district,
+	pincode: payload.address.pincode,
+	state: payload.address.state,
+	country: payload.address.country
+}]]]></snowflake:input-parameters>
+		</snowflake:insert>
+		<ee:transform doc:name="Transform Message">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "employee details created successfully with employeeId" ++ " " ++ vars.empid
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<error-handler >
+			<on-error-propagate enableNotifications="true" logException="true" doc:name="On Error Propagate" doc:id="e8c868cb-9bf9-4ab9-8c5d-8a201f115abb" type="ANY">
+				<ee:transform doc:name="Transform Message" doc:id="bf07fbc2-c45d-4d0a-a44d-14869a4e87a0" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"code": 500,
+	"message": "SERVER_ERROR",
+	"description": error.detailedDescription
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</on-error-propagate>
+		</error-handler>
+	</flow>
+	</mule>
