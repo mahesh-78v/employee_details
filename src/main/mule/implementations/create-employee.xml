@@ -34,7 +34,7 @@ http://www.mulesoft.org/schema/mule/snowflake http://www.mulesoft.org/schema/mul
 output application/json
 ---
 {
-	"message": "employee details created successfully with employeeId" ++ " " ++ vars.empid
+	"message": "employee details created successfully inserted in database with employeeId" ++ " " ++ vars.empid
 }]]></ee:set-payload>
             </ee:message>
         </ee:transform>
